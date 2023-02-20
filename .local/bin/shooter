@@ -1,0 +1,26 @@
+#!/bin/sh
+outputDir=$HOME/Pictures/screenshots/
+outputStyle=$outputDir"$(date +'%F-%I:%M:%S%P.png')"
+mkdir -p $outputDir
+
+case "$(printf "screenshot with grim\n📸 active window\n📐 area select\n📖 all screens\n🖥️ select a screen" | kickoff --from-stdin --stdout)" in
+  "📸 active window") 
+    maim -uf png -i "$(xdotool getactivewindow)" $outputStyle 
+    notify-send -i $outputStyle "Saved as:" $outputStyle
+    ;;
+  "📐 area select") 
+    grim -g "$(slurp -d -b '#131313aa' -c '#ffffffff')" -t png $outputStyle
+    wl-copy < $outputStyle
+    notify-send -i $outputStyle "Saved as:" $outputStyle
+    ;;
+  "📖 all screens") 
+    grim -t png $outputStyle
+    wl-copy < $outputStyle
+    notify-send -i $outputStyle "Saved as:" $outputStyle
+    ;;
+  "🖥️ select a screen")
+    grim -g "$(slurp -o)" -t png $outputStyle
+    wl-copy < $outputStyle
+    notify-send -i $outputStyle "Saved as:" $outputStyle
+    ;;
+esac

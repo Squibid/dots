@@ -1,0 +1,81 @@
+#!/bin/sh
+
+# sets your wallpaper
+# Requires: nsxiv, xwallpaper, wbg (for wayland support), libnotify, imagemagick
+
+restorePath="$HOME/.local/share/bg"
+wallLocation="$HOME/Desktop/wallpapers"
+helpMsg="Usage: setbg [OPTION] [FILE]
+
+-r,     restores image from $restorePath
+-a,     set a random image from $wallLocation (or another path specified as an argument)
+-s,     set an image of choice
+-w,     set an image of choice from the internet (will convert webps if imagemagick is installed)
+-h, --help shows help page
+
+Running without any flags will allow you to select from all wallpapers in $wallLocation via nsxiv"
+
+wallRestore() {
+  if [ "$(ps -e | grep Xorg)" ]; then
+    xwallpaper --zoom $restorePath
+  else
+    killall wbg
+    wbg $restorePath &
+  fi
+}
+wallSet() {
+  if [ "$(ps -e | grep Xorg)" ]; then
+    xwallpaper --zoom $wallChoice
+  else
+    if [ $wallChoice != "" ]; then killall wbg; fi
+    wallRestore
+  fi
+}
+imgpicker() {
+  nsxiv -to -
+}
+
+if [ $1 ]; then
+  case $1 in
+    "-r")
+      notify-send -i $restorePath "Restoring Wallpaper..." $restorePath &
+      wallRestore
+    ;;
+    "-a")
+      if [ $2 ]; then
+        wallChoice=$(find $2 -type f | shuf | head -1 )
+      else
+        wallChoice=$(find $wallLocation -type f | shuf | head -1 )
+      fi
+      notify-send -i $wallChoice "Setting Random Wallpaper..." $wallChoice &
+      wallSet
+      ln -sf $wallChoice $restorePath
+    ;;
+    "-s")
+      wallChoice=$2
+      notify-send -i $wallChoice "Setting Wallpaper..." $wallChoice &
+      wallSet
+      ln -sf $wallChoice $restorePath
+    ;;
+    "-w")
+      wallChoice=$2
+      case $wallChoice in
+        https*) wget -O $restorePath $wallChoice 
+          magick $restorePath $restorepath
+          notify-send -i $restorePath "Setting Wallpaper..." $wallChoice &
+          wallRestore
+    ;;
+    *) $0 -h ;;
+    esac
+    ;;
+  "-h")
+    printf "$helpMsg\n" ;;
+  "--help")
+    printf "$helpMsg\n" ;;
+  esac
+else
+  wallChoice=$(find $wallLocation -type f | imgpicker)
+  notify-send -i $wallChoice "Setting Wallpaper..." "$wallChoice" & 
+  wallSet
+  ln -sf $wallChoice $restorePath 
+fi

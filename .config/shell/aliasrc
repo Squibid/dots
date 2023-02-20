@@ -1,0 +1,79 @@
+#!/bin/sh
+
+# all the ls
+alias ls='ls -bpq --color=force --format=horizontal --group-directories-first' # ls but with colors
+alias la='ls -Abpq --color=force --format=horizontal --group-directories-first' # long version
+alias l1='ls -Abpq1 --color=force --group-directories-first' # 1 line
+alias ll='ls -Alhs --color=force --group-directories-first' # all info
+alias lc='ls -1 | wc -l'   # list count
+alias llc='ls -1A | wc -l' # long version
+
+alias v='$EDITOR'
+alias ns='$IMAGE'
+alias nb='$RSS'
+alias nm='mw -Y > /dev/null 2> /dev/null; neomutt'
+alias mpv='mpv --force-window --idle'
+
+alias cp='cp -r'
+alias grep='grep --color=auto'
+
+
+ex () {
+  if [ -f $1 ] ; then
+    case $1 in
+      *.tar.bz2)   tar xjf $1   ;;
+      *.tar.gz)    tar xzf $1   ;;
+      *.bz2)       bunzip2 $1   ;;
+      *.rar)       unrar x $1   ;;
+      *.gz)        gunzip $1    ;;
+      *.tar)       tar xf $1    ;;
+      *.tbz2)      tar xjf $1   ;;
+      *.tgz)       tar xzf $1   ;;
+      *.zip)       unzip $1     ;;
+      *.Z)         uncompress $1;;
+      *.7z)        7z x $1      ;;
+      *.deb)       ar x $1      ;;
+      *.tar.xz)    tar xf $1    ;;
+      *.tar.zst)   tar xf $1    ;;
+      *)           echo "'$1' cannot be extracted via ex()" ;;
+    esac
+  else
+    echo "'$1' is not a valid file"
+  fi
+}
+
+# Colourized less output
+cless() {
+  case "$1" in
+    *.md) glow -s dark "$1" | $PAGER -r;;
+    *) highlight -O ansi "$1" --force | $PAGER -r;;
+  esac
+}
+
+# Colourized cat output
+ccat() {
+  case "$1" in
+    *.md) glow -s dark "$1";;
+    *) highlight -O ansi "$1" --force;;
+  esac
+}
+
+cheat() {
+  curl -s cheat.sh/$1/$2 | $PAGER
+}
+
+# search through git commits
+gitc() {
+  git log --graph --color=always \
+    --format="%C(auto)%h%d %s %C(black)%C(bold)%cr" "$@" |
+    fzf --ansi --no-sort --reverse --tiebreak=index --bind=ctrl-s:toggle-sort \
+    --bind "ctrl-m:execute:
+      (grep -o '[a-f0-9]\{7\}' | head -1 |
+        xargs -I % sh -c 'git show --color=always % | $PAGER -R') << 'FZF-EOF'
+              {}
+              FZF-EOF"
+}
+
+mem() {
+  ps aux | grep $1 | cut -d ' ' -f 4 | xargs -I {} grep ^VmPeak /proc/{}/status
+}

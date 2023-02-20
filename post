@@ -1,0 +1,5 @@
+#!/bin/sh
+
+if [ $(id -u) != 0 ]; then echo "Run as root!"; exit; fi
+echo "permit persist :wheel" > /etc/doas.conf
+echo 'export ZDOTDIR="$HOME"/.config/zsh' > /etc/zsh/zshenv

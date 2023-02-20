@@ -1,0 +1,11 @@
+#!/bin/sh
+case $1 in
+  +*) pactl set-sink-volume @DEFAULT_SINK@ "$1%" ;;
+  -*) pactl set-sink-volume @DEFAULT_SINK@ "$1%" ;;
+  =*) pactl set-sink-volume @DEFAULT_SINK@ $(printf "$1%%\n" | sed "s/=//") ;;
+  m) pactl set-sink-mute @DEFAULT_SINK@ toggle ;;
+esac
+if [ $(pactl get-sink-mute @DEFAULT_SINK@ | grep -o "yes") ]; then icon="x"; else icon="+"; fi
+
+vol=$(pactl get-sink-volume @DEFAULT_SINK@ | grep -o '...%' | sed 's/%//' | sed 's/\ //' | head -1)
+dunstify -r 17 -h int:value:$vol "Volume: $icon$vol"

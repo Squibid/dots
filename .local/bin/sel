@@ -1,0 +1,5 @@
+#!/bin/sh
+
+grim -g "$(slurp -d -b '#131313aa' -c '#ffffffff')" -t png /tmp/sel.png
+mpv --fs /tmp/sel.png
+rm /tmp/sel.png

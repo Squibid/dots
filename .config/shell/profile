@@ -1,0 +1,57 @@
+#!/bin/sh
+# exporting paths
+export XDG_DATA_HOME=${XDG_DATA_HOME:="$HOME/.local/share"}
+export XDG_CACHE_HOME=${XDG_CACHE_HOME:="$HOME/.local/cache"}
+export XDG_CONFIG_HOME=${XDG_CONFIG_HOME:="$HOME/.config"}
+export XDG_STATE_HOME=${XDG_STATE_HOME:="$HOME/.local/state"}
+export PATH="$PATH:${$(find ~/.local/bin -type d -printf %p:)%%:}"
+
+# start graphical session
+if [ -z "$DISPLAY" ] && [ "$(fgconsole 2> /dev/null)" -eq 1 ]; then
+  mkdir -p /tmp/dwl
+  dbus-run-session pipewire &
+  pipewire-pulse &
+  exec dwl -s 'setbg -r' >> /tmp/dwl/stdout 2>> /tmp/dwl/stderr
+fi
+export COLORTERM="truecolor"
+
+# default programs
+export EDITOR=nvim
+export READER=zathura
+export RSS=newsboat
+export VIDEO=mpv
+export IMAGE=mpv
+export TERMINAL=foot
+export BROWSER=qutebrowser
+export SHELL=zsh
+export OPENER=xdg-open
+export PAGER=less
+
+# wayland envvars
+export MOZ_ENABLE_WAYLAND=1
+export XDG_SESSION_TYPE=wayland
+export XDG_CURRENT_DESKTOP=dwl
+export QT_QPA_PLATFORM=wayland
+export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+
+# hist envvars
+# HISTSIZE=1000
+# SAVEHIST=1000
+# export HISTFILE=$XDG_CONFIG_HOME"/shell/history"
+
+# clean ~/
+export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
+compinit -d "$XDG_CACHE_HOME"/zsh/zcompdump-"$ZSH_VERSION"
+export WINEPREFIX="$XDG_DATA_HOME"/wine
+export INPUTRC="$XDG_CONFIG_HOME"/readline/inputrc
+export PASSWORD_STORE_DIR="$XDG_DATA_HOME"/pass
+export _JAVA_OPTIONS=-Djava.util.prefs.userRoot="$XDG_CONFIG_HOME"/java
+export GRADLE_USER_HOME="$XDG_DATA_HOME"/gradle
+export GNUPGHOME="$XDG_DATA_HOME"/gnupg
+export CARGO_HOME="$XDG_DATA_HOME"/cargo
+export PYTHONSTARTUP="/etc/python/pythonrc"
+export MBSYNCRC="$XDG_CONFIG_HOME"/isync/mbsyncrc
+
+# other programs
+export LESS=-R
+export LS_COLORS='di=34:or=1;5;30;101:ln=1;30;106:ex=92:*.o=92:*.zip=4;31:*.tar.gz=4;31:*.tgz=4;31:*.jar=4;31:*.c=90:*.h=90:*.patch=97;100:*.diff=97;100:*.1=93:*.md=93:*.txt=93:*Makefile=1;90;102:*.mk=1;90;102:*.png=36:*.jpg=36:*.jpeg=36:'
